@@ -1,10 +1,18 @@
-[deploy]
-# Railway deployment configuration.
-# The application is a Dockerfile-based service: Railway builds this file and
-# injects runtime environment variables (including PORT).
+# Railway deployment configuration (Config as Code).
+#
+# The application is a Dockerfile-based service: Railway finds the Dockerfile at
+# the repo root and builds it. Runtime environment variables, including PORT,
+# are injected by the platform; the container CMD reads them at runtime.
+#
+# Schema reference: https://docs.railway.com/config-as-code/reference
+# NOTE: Config as Code is deprecated in favour of Infrastructure as Code.
+#       Existing railway.toml files keep working until 2026-12-01.
 
+"$schema" = "https://railway.com/railway.schema.json"
+
+[deploy]
+# Railway probes this path after starting the container. Both /health and
+# /ready returned HTTP 200 during local verification; /health is liveness,
+# /ready additionally proves the database is reachable.
 healthcheckPath = "/health"
 healthcheckTimeout = 30
-
-[deploy.cli]
-# Let Railway run the image as-is; the CMD in the Dockerfile honours PORT.

@@ -50,9 +50,9 @@ Consequence: Docker items below are **FAIL** (environment), and every Docker-dep
 | 23 | Telegram WebApp auth validation | **PASS** (HMAC, fake token) | Ran a second instance with a dummy bot token to execute the real validation path: correctly-signed initData → passes signature check, reaches link check (401 "not linked"); forged hash → 401; tampered user field → 401; wrong secret → 401; stale `auth_date` → 401 "expired"; empty/missing → 422. Server validates the HMAC of `initData` itself; **`initDataUnsafe` is never used** (verified in source: only `payload.init_data` reaches the backend). |
 | 24 | Frontend production build | **PASS** | Exit 0 (see #5); dist clean. |
 | 25 | Frontend bundle scan | **PASS** | dist/ contains no `localhost`, `127.0.0.1`, dev URLs, port 5173/8000, JWT shapes, secret-shaped assignments, or Telegram-token shapes. Only W3C namespace URLs and React docs link. |
-| 26 | Backend source security scan | **PASS** | No hardcoded passwords/tokens (`grep` for secret-shaped assignments: none). No `debug=True`. Only subprocess use is `asyncio.create_subprocess_exec` on the configured xray binary with fixed arguments (`run -config <path>`, `version`) — no shell, no user-controlled command. No f-string/concatenated SQL; all queries parameterised via SQLAlchemy. |
+| 26 | Security checks (backend source) | **PASS** | No hardcoded passwords/tokens (`grep` for secret-shaped assignments: none). No `debug=True`. Only subprocess use is `asyncio.create_subprocess_exec` on the configured xray binary with fixed arguments (`run -config <path>`, `version`) — no shell, no user-controlled command. No f-string/concatenated SQL; all queries parameterised via SQLAlchemy. |
 | 27 | No generic command execution | **PASS** | No `/exec`, `/run-command`, `/terminal` or equivalent route exists (full OpenAPI paths enumerated). Service actions are a fixed regex-whitelisted enum (`start|stop|restart|reload|test`) — verified `rm -rf /` → 422. |
-| 28 | Railway compatibility | **PASS** (static + local runtime) | `HOST=0.0.0.0` set in Dockerfile runtime image; `PORT` honoured dynamically — verified by starting the production process with `PORT=54321`: bound `0.0.0.0:54321`, `/health` 200, startup log shows `port: 54321` from env. `DATABASE_URL` is the consumed setting (normalised `postgres://`→`postgresql://`, async driver selected). No hardcoded Railway port. |
+| — | Railway compatibility result | **PASS** (static + local runtime) | `HOST=0.0.0.0` set in Dockerfile runtime image; `PORT` honoured dynamically — verified by starting the production process with `PORT=54321`: bound `0.0.0.0:54321`, `/health` 200, startup log shows `port: 54321` from env. `DATABASE_URL` is the consumed setting (normalised `postgres://`→`postgresql://`, async driver selected). No hardcoded Railway port. `railway.toml` validated against the official Config-as-Code schema — a non-schema `[deploy.cli]` table that shipped in the tree was removed (see §3 #13). |
 | 29 | DATABASE_URL used | **PASS** | Real connection to `postgresql://…@127.0.0.1:55432/zynox` drove migrations, seeding, and every E2E request. |
 | 30 | Docker image prod-env start | **FAIL** | Could not start a Docker image (engine blocked, #1). Equivalent native production-env start verified instead. |
 | 31 | Graceful shutdown | **PASS** | CTRL_BREAK to the real uvicorn process → logs show `application shutting down` then `application stopped` (engine disposed); no traceback. |
@@ -67,7 +67,7 @@ Consequence: Docker items below are **FAIL** (environment), and every Docker-dep
 | 40 | Failures fixed and re-run | **PASS** | All failures found during verification were root-caused and fixed (list in §3); every affected test was re-run to green. |
 | — | Railway deployment itself | **NOT EXECUTED** | Railway deployment not executed; Railway compatibility verified locally. |
 
-Summary: **PASS 34 · FAIL 3 (all Docker-environment) · SKIPPED 2 · NOT EXECUTED 1**
+Summary: **PASS 35 · FAIL 3 (all Docker-environment) · SKIPPED 2 · NOT EXECUTED 1**
 
 ---
 
@@ -85,6 +85,7 @@ Summary: **PASS 34 · FAIL 3 (all Docker-environment) · SKIPPED 2 · NOT EXECUT
 10. **Frontend build failed** — unused `waitFor` import broke `tsc -b`. Fixed.
 11. **Python 3.12-only syntax** — `class BaseRepository[T]:` could not compile on the image's Python 3.11. Fixed: `Generic[T]`.
 12. **Lint debt** — ruff 283 → 0 (real fixes + justified `noqa` for intentional `0.0.0.0` binds, token-type labels, str-Enum serialisation); mypy 62 → 0 (TYPE_CHECKING imports for relationship targets, code-specific ignores for SQLAlchemy/Pydantic typing friction, one real `list[Role]` fix); ESLint 9 flat config added (36 files clean).
+13. **`railway.toml` contained a non-schema key** — `[deploy.cli]` is not in Railway's Config-as-Code schema, which risks a config parse failure at deploy time. Removed, and the official `$schema` reference added for editor validation. `healthcheckPath = "/health"` and `healthcheckTimeout = 30` are confirmed valid keys.
 
 ---
 
@@ -92,7 +93,7 @@ Summary: **PASS 34 · FAIL 3 (all Docker-environment) · SKIPPED 2 · NOT EXECUT
 
 - **Docker items (1, 2, 30, 32) failed for environmental reasons** — this Windows host has Virtual Machine Platform disabled. The Dockerfile/compose files themselves were not proven broken, but they were also not proven working here. Re-run on a virtualisation-capable host for a true Docker PASS.
 - **Railway deployment was not executed.** Compatibility was verified locally (dynamic PORT, HOST=0.0.0.0, DATABASE_URL, migrations on a fresh real database). No claim of a successful Railway deploy is made.
-- **Telegram live E2E was skipped** (no token). The server-side HMAC validation path was fully verified with a dummy token; bot polling was not (dependency not installed).
+- **Telegram live E2E was skipped** (no token). The server-side HMAC validation path was exercised end-to-end with a dummy token (7/7 checks); bot polling was not (dependency not installed).
 - **Access tokens are stateless after logout** — by design (JWT, no denylist). Documented here so the behaviour is an explicit, verified contract rather than an assumption.
 
 ---
