@@ -1,0 +1,81 @@
+# ── Editor / OS ───────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Tooling workspace metadata ─────────
+.freebuff/
+
+# ── Environment / secrets ────────────
+.env
+.env.*
+!.env.example
+!.env.test.example
+*.pem
+*.key
+*.secret
+*.secret.*
+*.p12
+*.pfx
+*.jks
+*credentials*.json
+*token*.txt
+secrets/
+
+# ── Python ───────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.mypy_cache/
+.ruff_cache/
+
+# ── Node ─────────────────────────────
+node_modules/
+frontend/dist/
+frontend/node_modules/
+*.tsbuildinfo
+.npm
+.pnpm-store/
+
+# ── Testing / tooling output ─────────
+test-results/
+playwright-report/
+junit.xml
+
+# ── Docker ───────────────────────────
+docker-data/
+
+# ── Build artifacts & data ───────────
+*.log
+logs/
+data/
+uploads/
+db.sqlite3

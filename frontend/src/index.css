@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-base-950 text-slate-100;
+    font-feature-settings: 'cv11', 'ss01';
+    text-rendering: optimizeLegibility;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    @apply bg-base-900;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-base-600;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-base-500;
+  }
+}
+
+@layer components {
+  .animate-in {
+    animation-duration: 0.15s;
+    animation-fill-mode: both;
+  }
+  .slide-in-from-right {
+    animation-name: slideInFromRight;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

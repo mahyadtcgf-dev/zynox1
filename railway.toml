@@ -1,0 +1,10 @@
+[deploy]
+# Railway deployment configuration.
+# The application is a Dockerfile-based service: Railway builds this file and
+# injects runtime environment variables (including PORT).
+
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+
+[deploy.cli]
+# Let Railway run the image as-is; the CMD in the Dockerfile honours PORT.

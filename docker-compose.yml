@@ -1,0 +1,58 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zynox-app
+    environment:
+      APP_NAME: ${APP_NAME:-Zynox}
+      APP_ENV: ${APP_ENV:-production}
+      DEBUG: ${DEBUG:-false}
+      HOST: 0.0.0.0
+      PORT: 8000
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-zynox}:${POSTGRES_PASSWORD:-zynox}@postgres:5432/${POSTGRES_DB:-zynox}
+      JWT_SECRET: ${JWT_SECRET}
+      SESSION_SECRET: ${SESSION_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_MINI_APP_URL: ${TELEGRAM_MINI_APP_URL:-}
+      XRAY_BINARY_PATH: ${XRAY_BINARY_PATH:-/usr/local/bin/xray}
+      XRAY_CONFIG_PATH: ${XRAY_CONFIG_PATH:-/etc/xray/config.json}
+      XRAY_CONTROL_MODE: ${XRAY_CONTROL_MODE:-disabled}
+    ports:
+      - "${PANEL_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: zynox-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-zynox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zynox}
+      POSTGRES_DB: ${POSTGRES_DB:-zynox}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-zynox} -d ${POSTGRES_DB:-zynox}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
