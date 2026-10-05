@@ -65,9 +65,13 @@ Consequence: Docker items below are **FAIL** (environment), and every Docker-dep
 | 38 | Backend tests | **PASS** | Duplicate of #34 — 42/42. |
 | 39 | Integration tests | **PASS** | 102-check black-box HTTP suite against the live server on real PostgreSQL: **101 PASS, 0 FAIL, 1 SKIPPED** (Telegram live). Covers auth, JWT, refresh rotation+reuse, logout, RBAC, Service CRUD, Config CRUD+export+duplicate, TCP/WS/xHTTP generation, QR, share URLs, monitoring, audit. |
 | 40 | Failures fixed and re-run | **PASS** | All failures found during verification were root-caused and fixed (list in §3); every affected test was re-run to green. |
+| — | Git repository created | **PASS** | `git init`, repo-local identity, branch renamed `master` → `main`. 4 commits, 123 tracked files, working tree clean. |
+| — | Secret scan before commit | **PASS** | 123 staged files scanned for Telegram tokens, JWTs, private keys, AWS/Slack/Google/GitHub tokens, Postgres DSNs with credentials and assigned secret literals → **0 hits**. Two candidates reviewed and confirmed false positives (a documentation-format dummy token used inside `tests/test_security.py` via monkeypatch, and docker-compose variable interpolation). Scanner committed as `scripts/secret_scan.py`. |
+| — | GitHub repository created | **PASS** | `POST /user/repos` → HTTP 201. `mahyadtcgf-dev/zynox1`, private, default branch `main`, `auto_init` false so no unrelated history. |
+| — | GitHub push | **PASS** | `git push -u origin main` → exit 0, `* [new branch] main -> main`. Remote tip verified equal to local tip (`5971bbf29ecabbdad3f9c3de496d8e6168a034ad`) via `git ls-remote`; all 4 commits and 11 top-level entries confirmed present through the GitHub API. The PAT was used only as a transient HTTP header — it appears in neither `.git/config`, the remote URL, nor any tracked file (`git grep ghp_` clean). |
 | — | Railway deployment itself | **NOT EXECUTED** | Railway deployment not executed; Railway compatibility verified locally. |
 
-Summary: **PASS 35 · FAIL 3 (all Docker-environment) · SKIPPED 2 · NOT EXECUTED 1**
+Summary: **PASS 39 · FAIL 3 (all Docker-environment) · SKIPPED 2 · NOT EXECUTED 1**
 
 ---
 
