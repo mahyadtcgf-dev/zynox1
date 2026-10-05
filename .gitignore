@@ -79,3 +79,6 @@ logs/
 data/
 uploads/
 db.sqlite3
+
+# Vite config build artifacts
+frontend/vite.config.d.ts
